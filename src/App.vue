@@ -5,38 +5,38 @@
         form
           input#input-city-name.search-bar-item-style(type='text' placeholder='Your city name' v-model='inputCity')
           input#search-city-button.search-bar-item-style(type='button' value='search' @click='search() + showElement()')
-          h4 {{tempSwitch}}
           label#temp-switch-btn
-            input#temp-check-box(type='checkbox' v-model="tempSwitch")
+            input#temp-check-box(type='checkbox' v-model='tempSwitch')
             span#temp-slider.round
             span#temp-unit °C　°F
       section#weather-data-container
         section#current-weather-container.inline-block
-          h2#current-weather-title.deep-gary-title(v-show="display")
+          h2#current-weather-title.deep-gary-title(v-show='display')
             | Weather in {{city}}, {{country}}
             span#current-weather-city
             span#current-weather-country
-          img#current-weather-image(alt='weatherIcon' v-bind:src='currImg' v-show="display")
+          img#current-weather-image(alt='weatherIcon' v-bind:src='currImg' v-show='display')
           h2#current-weather-temp.deep-gary-title.inline-block {{currTemp}}
           p#current-descrip-text {{currDescrip}}
           p#current-descrip-time {{currTime}}
-          table#current-weather-table(v-show="display")
+          table#current-weather-table(v-show='display')
             template(v-for='item in currTable')
               tr
                 td {{item.prop}}
                 td {{item.value}}
         section#forecast-weather-container.inline-block
-          h2#fore-weather-title(v-show="display") Current weather and forecasts in your city
-          ul#fore-tab-list(v-show="display")
+          h2#fore-weather-title(v-show='display') Current weather and forecasts in your city
+          ul#fore-tab-list(v-show='display')
             li.inline-block
-              a#forecast-tab-main.forecast-tab(href='#') Main
+              a#forecast-tab-main.forecast-tab(href='#' @click='showTabContent') Main
             li.inline-block
-              a#forecast-tab-hourly.forecast-tab(href='#') Hourly
-          h3#fore-weather-subtitle(v-show="display")
-            | Weather and forecasts in
+              a#forecast-tab-hourly.forecast-tab(href='#' @click='showTabContent') Hourly
+          h3#fore-weather-subtitle(v-show='display')
+            | Weather and forecasts in {{city}}, {{country}}
             span#fore-weather-city
             span#fore-weather-country
           section#Main.tab-content.tab-content-show
+            h3(v-show='display') main
             section#chart-container.fore-main-chart-container
             section#fore-main-info-container
               - for(let i = 10; i > 0; i--)
@@ -46,9 +46,20 @@
                   p.fore-main-wind
                   p.fore-main-hpa.color-light-gray
           section#Hourly.tab-content
+            h3(v-show='display') hourly
             table#fore-weather-hourly-table
+              template(v-for='item in foreTable')
+                tr
+                  td.hourly-info-td
+                    span {{item.dt1}}
+                    img(alt='weatherIcon' :src='item.weather[0].icon')
+                  td.hourly-info-td
+                    p {{item.dt2}}
+                      span.hourly-temp {{item.main.temp}}
+                      em {{item.weather[0].description}}
+                    p
     h1 {{ msg }}
-    img(src="./assets/logo.png")
+    img(src='./assets/logo.png')
     router-view
 </template>
 
@@ -56,6 +67,8 @@
 
 import axios from 'axios'
 import moment from 'moment'
+// import Highcharts from 'highcharts'
+// import chartObject from './chartObject'
 
 export default {
   name: 'app',
@@ -79,7 +92,8 @@ export default {
         {prop: 'Sunrise', value: ''},
         {prop: 'Sunset', value: ''},
         {prop: 'Coord', value: ''}
-      ]
+      ],
+      foreTable: []
     }
   },
   methods: {
@@ -104,8 +118,10 @@ export default {
       ])
         .then(([{data: acct}, {data: perms}]) => {
           this.currentData(acct, degrees)
-          // genCurrentData(acct, degrees)
-          // genForecastData(perms, degrees)
+          this.forecastData(perms, degrees)
+          // this.foreTable = perms.list
+          // console.log(this.foreTable)
+          // console.log(this.foreTable[0].)
         })
         .catch(function (error) {
           console.log(error)
@@ -113,6 +129,13 @@ export default {
     },
     showElement: function () {
       this.display = true
+    },
+    showTabContent: function (event) {
+      const displayingSection = document.querySelector('.tab-content-show')
+      const selectedSection = document.querySelector('#' + event.target.textContent)
+
+      displayingSection.className = displayingSection.className.replace('tab-content-show', '')
+      selectedSection.className = selectedSection.className + ' tab-content-show'
     },
     currentData: function (apiData, degrees) {
       const currTableData = [
@@ -134,6 +157,26 @@ export default {
       this.currTable.forEach((item, index) => {
         item.value = currTableData[index]
       })
+    },
+    forecastData: function (apiData, degrees, chartObject) {
+      // this.foreTable.map() =
+      this.foreTable = apiData.list.map((item) => {
+        // item.dt = moment(item.dt * 1000).format('HH:mm')
+        item.weather[0].icon = 'https://openweathermap.org/img/w/' + item.weather[0].icon + '.png'
+        item.main.temp = item.main.temp.toFixed(1) + degrees
+        item.dt1 = moment(item.dt * 1000).format('HH:mm')
+        item.dt2 = moment(item.dt * 1000).format('ddd MMM DD YYYY')
+        return item
+      })
+      // console.log(tempArray)
+
+      // console.log(this.foreTable)
+      // this.foreTable.forEach((item, index) => {
+      //   item.weather[0].icon = 'https://openweathermap.org/img/w/' + item.weather[0].icon + '.png'
+      //   console.log(item.weather[0].icon)
+      // })
+      // console.log(this.foreTable)
+      // console.log(apiData, degrees, chartObject)
     }
   }
 }
