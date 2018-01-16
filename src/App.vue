@@ -13,14 +13,18 @@
       section#weather-data-container
         section#current-weather-container.inline-block
           h2#current-weather-title.deep-gary-title(v-show="display")
-            | Weather in
+            | Weather in {{city}}, {{country}}
             span#current-weather-city
             span#current-weather-country
-          img#current-weather-image(alt='weatherIcon' v-show="display")
-          h2#current-weather-temp.deep-gary-title.inline-block
-          p#current-descrip-text
-          p#current-descrip-time
-          table#current-weather-table
+          img#current-weather-image(alt='weatherIcon' v-bind:src='currImg' v-show="display")
+          h2#current-weather-temp.deep-gary-title.inline-block {{currTemp}}
+          p#current-descrip-text {{currDescrip}}
+          p#current-descrip-time {{currTime}}
+          table#current-weather-table(v-show="display")
+            template(v-for='item in currTable')
+              tr
+                td {{item.prop}}
+                td {{item.value}}
         section#forecast-weather-container.inline-block
           h2#fore-weather-title(v-show="display") Current weather and forecasts in your city
           ul#fore-tab-list(v-show="display")
@@ -51,6 +55,7 @@
 <script>
 
 import axios from 'axios'
+import moment from 'moment'
 
 export default {
   name: 'app',
@@ -59,7 +64,22 @@ export default {
       msg: 'testtest',
       inputCity: '',
       tempSwitch: false,
-      display: false
+      display: false,
+      city: '',
+      country: '',
+      currImg: '',
+      currTemp: '',
+      currDescrip: '',
+      currTime: '',
+      currTable: [
+        {prop: 'Wind', value: ''},
+        {prop: 'Cloudiness', value: ''},
+        {prop: 'Pressure', value: ''},
+        {prop: 'Humidity', value: ''},
+        {prop: 'Sunrise', value: ''},
+        {prop: 'Sunset', value: ''},
+        {prop: 'Coord', value: ''}
+      ]
     }
   },
   methods: {
@@ -82,9 +102,8 @@ export default {
           }
         })
       ])
-        .then(function ([{data: acct}, {data: perms}]) {
-          console.log(perms)
-          console.log(degrees)
+        .then(([{data: acct}, {data: perms}]) => {
+          this.currentData(acct, degrees)
           // genCurrentData(acct, degrees)
           // genForecastData(perms, degrees)
         })
@@ -94,6 +113,27 @@ export default {
     },
     showElement: function () {
       this.display = true
+    },
+    currentData: function (apiData, degrees) {
+      const currTableData = [
+        apiData.wind.speed + 'm/s, ' + apiData.wind.deg,
+        'Broken clouds',
+        apiData.main.pressure + ' hpa',
+        apiData.main.humidity + ' %',
+        moment(apiData.sys.sunrise * 1000).format('HH:mm'),
+        moment(apiData.sys.sunset * 1000).format('HH:mm'),
+        '[ ' + apiData.coord.lat + ', ' + apiData.coord.lon + ' ]'
+      ]
+
+      this.city = apiData.name
+      this.country = apiData.sys.country
+      this.currImg = 'https://openweathermap.org/img/w/' + apiData.weather[0].icon + '.png'
+      this.currTemp = parseInt(apiData.main.temp) + degrees
+      this.currDescrip = apiData.weather[0].description
+      this.currTime = moment(apiData.dt * 1000).format('HH:mm MMM DD')
+      this.currTable.forEach((item, index) => {
+        item.value = currTableData[index]
+      })
     }
   }
 }
@@ -170,8 +210,10 @@ html, body {
 
 #current-weather-container {
   @include text(14px, $title-deep-gray)
-  vertical-align: top;
   min-width: 250px;
+  #current-weather-temp {
+    margin-top: 11px;
+  }
   table {
     border-collapse: collapse;
   }
