@@ -4,9 +4,9 @@
       section#search-bar-container
         form
           input#input-city-name.search-bar-item-style(type='text' placeholder='Your city name' v-model='inputCity')
-          input#search-city-button.search-bar-item-style(type='button' value='search' @click='search() + showElement()')
+          input#search-city-button.search-bar-item-style(type='button' value='search' @click='search')
           label#temp-switch-btn
-            input#temp-check-box(type='checkbox' v-model='tempSwitch')
+            input#temp-check-box(type='checkbox' v-model='tempSwitch' @click='search')
             span#temp-slider.round
             span#temp-unit °C　°F
       section#weather-data-container
@@ -28,36 +28,42 @@
           h2#fore-weather-title(v-show='display') Current weather and forecasts in your city
           ul#fore-tab-list(v-show='display')
             li.inline-block
-              a#forecast-tab-main.forecast-tab(href='#' @click='showTabContent') Main
+              a#forecast-tab-main.forecast-tab(href='#' @click='showMainContent') Main
             li.inline-block
-              a#forecast-tab-hourly.forecast-tab(href='#' @click='showTabContent') Hourly
+              a#forecast-tab-hourly.forecast-tab(href='#' @click='showHourlyContent') Hourly
           h3#fore-weather-subtitle(v-show='display')
             | Weather and forecasts in {{city}}, {{country}}
             span#fore-weather-city
             span#fore-weather-country
-          section#Main.tab-content.tab-content-show
-            h3(v-show='display') main
+          section#Main.tab-content(v-show='displayMain')
+            h3(v-show='display')
             section#chart-container.fore-main-chart-container
             section#fore-main-info-container
-              - for(let i = 10; i > 0; i--)
+              template(v-for='item in foreMainTable')
                 section.fore-main-info.inline-block
-                  img.fore-main-img
-                  p.fore-main-temp
-                  p.fore-main-wind
-                  p.fore-main-hpa.color-light-gray
-          section#Hourly.tab-content
-            h3(v-show='display') hourly
+                  img.fore-main-img(alt='weatherIcon' v-bind:src='item.icon')
+                  p.fore-main-temp {{item.temp}}
+                  p.fore-main-wind {{item.wind}}
+                  p.fore-main-hpa.color-light-gray {{item.hpa}}
+          section#Hourly.tab-content(v-show='displayHourly')
             table#fore-weather-hourly-table
-              template(v-for='item in foreTable')
+              template(v-for='(item, index) in foreHourlyTable')
+                tr(v-if='index === 0')
+                  td.hourly-date-td(colspan='2')
+                    strong {{item.timeDmdy}}
                 tr
                   td.hourly-info-td
-                    span {{item.dt1}}
+                    span {{item.timeHm}}
                     img(alt='weatherIcon' :src='item.weather[0].icon')
                   td.hourly-info-td
-                    p {{item.dt2}}
+                    p
                       span.hourly-temp {{item.main.temp}}
                       em {{item.weather[0].description}}
-                    p
+                    p {{item.hourlyDetail}}
+                tr(v-if='item.displayHourlyDateRow')
+                  td.hourly-date-td(colspan='2')
+                    strong {{item.timeDmdy}}
+
     h1 {{ msg }}
     img(src='./assets/logo.png')
     router-view
@@ -67,8 +73,8 @@
 
 import axios from 'axios'
 import moment from 'moment'
-// import Highcharts from 'highcharts'
-// import chartObject from './chartObject'
+import Highcharts from 'highcharts'
+import chartObj from './chartObject'
 
 export default {
   name: 'app',
@@ -78,6 +84,8 @@ export default {
       inputCity: '',
       tempSwitch: false,
       display: false,
+      displayMain: true,
+      displayHourly: false,
       city: '',
       country: '',
       currImg: '',
@@ -93,11 +101,19 @@ export default {
         {prop: 'Sunset', value: ''},
         {prop: 'Coord', value: ''}
       ],
-      foreTable: []
+      foreHourlyTable: [],
+      foreMainTable: []
+    }
+  },
+  watch: {
+    tempSwitch () {
+      this.search()
     }
   },
   methods: {
     search: function () {
+      console.log(this)
+      console.log(this.tempSwitch)
       const degrees = this.tempSwitch ? ' °F' : ' °C'
 
       Promise.all([
@@ -117,11 +133,9 @@ export default {
         })
       ])
         .then(([{data: acct}, {data: perms}]) => {
+          this.showElement()
           this.currentData(acct, degrees)
           this.forecastData(perms, degrees)
-          // this.foreTable = perms.list
-          // console.log(this.foreTable)
-          // console.log(this.foreTable[0].)
         })
         .catch(function (error) {
           console.log(error)
@@ -130,12 +144,13 @@ export default {
     showElement: function () {
       this.display = true
     },
-    showTabContent: function (event) {
-      const displayingSection = document.querySelector('.tab-content-show')
-      const selectedSection = document.querySelector('#' + event.target.textContent)
-
-      displayingSection.className = displayingSection.className.replace('tab-content-show', '')
-      selectedSection.className = selectedSection.className + ' tab-content-show'
+    showMainContent: function () {
+      this.displayMain = true
+      this.displayHourly = false
+    },
+    showHourlyContent: function () {
+      this.displayMain = false
+      this.displayHourly = true
     },
     currentData: function (apiData, degrees) {
       const currTableData = [
@@ -159,24 +174,56 @@ export default {
       })
     },
     forecastData: function (apiData, degrees, chartObject) {
-      // this.foreTable.map() =
-      this.foreTable = apiData.list.map((item) => {
-        // item.dt = moment(item.dt * 1000).format('HH:mm')
+      this.foreHourlyTable = apiData.list.map((item, index, array) => {
         item.weather[0].icon = 'https://openweathermap.org/img/w/' + item.weather[0].icon + '.png'
         item.main.temp = item.main.temp.toFixed(1) + degrees
-        item.dt1 = moment(item.dt * 1000).format('HH:mm')
-        item.dt2 = moment(item.dt * 1000).format('ddd MMM DD YYYY')
+        item.timeHm = moment(item.dt * 1000).format('HH:mm')
+        item.hourlyDetail = item.wind.speed + ', m/s   ' + 'clouds: ' + item.clouds.all + '%,  ' + item.main.pressure + ' hpa'
+        array[0].timeDmdy = moment(array[0].dt * 1000).format('ddd MMM DD YYYY')
+
+        if (index < array.length - 1 && !moment(item.dt * 1000).isSame(array[index + 1].dt * 1000, 'day')) {
+          item.displayHourlyDateRow = true
+          item.timeDmdy = moment(array[index + 1].dt * 1000).format('ddd MMM DD YYYY')
+        } else {
+          item.displayHourlyDateRow = false
+        }
+
         return item
       })
-      // console.log(tempArray)
 
-      // console.log(this.foreTable)
-      // this.foreTable.forEach((item, index) => {
-      //   item.weather[0].icon = 'https://openweathermap.org/img/w/' + item.weather[0].icon + '.png'
-      //   console.log(item.weather[0].icon)
-      // })
-      // console.log(this.foreTable)
-      // console.log(apiData, degrees, chartObject)
+      for (let i = 0; i < 10; i++) {
+        const data = apiData.list[i]
+        this.foreMainTable[i] = {}
+        this.foreMainTable[i].icon = data.weather[0].icon
+        this.foreMainTable[i].wind = data.wind.speed + ' m/s'
+        this.foreMainTable[i].hpa = data.main.pressure
+        this.foreMainTable[i].temp = data.main.temp
+      }
+
+      this.buildMainChart(apiData.list, degrees, chartObj)
+    },
+    buildMainChart: function (apiData, degrees, chartObj) {
+      const config = JSON.parse(JSON.stringify(chartObj))
+
+      config.yAxis[0].labels.formatter =
+        function () {
+          return Math.round(this.value) + degrees
+        }
+
+      for (let i = 0; i < 10; i++) {
+        const data = apiData[i]
+        config.xAxis.categories.push(moment(data.dt * 1000).format('HH:mm'))
+        config.series[1].data.push(parseFloat(data.main.temp))
+        if (data.hasOwnProperty('rain')) {
+          for (let item in data.rain) {
+            config.series[0].data.push(data.rain[item].toFixed(3) * 1000)
+          }
+        } else {
+          config.series[0].data.push(0)
+        }
+      }
+
+      Highcharts.chart('chart-container', config)
     }
   }
 }
@@ -332,13 +379,13 @@ html, body {
   background-color: $hourly-temp-gray;
 }
 
-.tab-content {
-  display: none;
-}
+// .tab-content {
+//   display: none;
+// }
 
-.tab-content-show {
-  display: block;
-}
+// .tab-content-show {
+//   display: block;
+// }
 
 #chart-container {
   max-width: 100%;
@@ -353,7 +400,7 @@ html, body {
     margin: 2px 0px;
   }
   .fore-main-info {
-    margin: 0px 3.5px;
+    margin: 0px 2.8px;
   }
   .color-light-gray {
     color: $main-hpa-gray;
