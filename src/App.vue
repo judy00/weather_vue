@@ -10,59 +10,25 @@
             span#temp-slider.round
             span#temp-unit °C　°F
       section#weather-data-container
-        section#current-weather-container.inline-block
-          h2#current-weather-title.deep-gary-title(v-show='display')
-            | Weather in {{city}}, {{country}}
-            span#current-weather-city
-            span#current-weather-country
-          img#current-weather-image(alt='weatherIcon' v-bind:src='currImg' v-show='display')
-          h2#current-weather-temp.deep-gary-title.inline-block {{currTemp}}
-          p#current-descrip-text {{currDescrip}}
-          p#current-descrip-time {{currTime}}
-          table#current-weather-table(v-show='display')
-            template(v-for='item in currTable')
-              tr
-                td {{item.prop}}
-                td {{item.value}}
+        currentWeather(v-bind:display='display'
+                       v-bind:currInfo='currInfo'
+                       v-bind:currTable='currTable'
+                      )
         section#forecast-weather-container.inline-block
           h2#fore-weather-title(v-show='display') Current weather and forecasts in your city
           ul#fore-tab-list(v-show='display')
             li.inline-block
-              a#forecast-tab-main.forecast-tab(href='#' @click='showMainContent') Main
+              a#forecast-tab-main.forecast-tab(href='#' @click="content='tabMain'") Main
             li.inline-block
-              a#forecast-tab-hourly.forecast-tab(href='#' @click='showHourlyContent') Hourly
+              a#forecast-tab-hourly.forecast-tab(href='#' @click="content='tabHourly'") Hourly
           h3#fore-weather-subtitle(v-show='display')
-            | Weather and forecasts in {{city}}, {{country}}
+            | Weather and forecasts in {{currInfo.city}}, {{currInfo.country}}
             span#fore-weather-city
             span#fore-weather-country
-          section#Main.tab-content(v-show='displayMain')
-            h3(v-show='display')
-            section#chart-container.fore-main-chart-container
-            section#fore-main-info-container
-              template(v-for='item in foreMainTable')
-                section.fore-main-info.inline-block
-                  img.fore-main-img(alt='weatherIcon' v-bind:src='item.icon')
-                  p.fore-main-temp {{item.temp}}
-                  p.fore-main-wind {{item.wind}}
-                  p.fore-main-hpa.color-light-gray {{item.hpa}}
-          section#Hourly.tab-content(v-show='displayHourly')
-            table#fore-weather-hourly-table
-              template(v-for='(item, index) in foreHourlyTable')
-                tr(v-if='index === 0')
-                  td.hourly-date-td(colspan='2')
-                    strong {{item.timeDmdy}}
-                tr
-                  td.hourly-info-td
-                    span {{item.timeHm}}
-                    img(alt='weatherIcon' :src='item.weather[0].icon')
-                  td.hourly-info-td
-                    p
-                      span.hourly-temp {{item.main.temp}}
-                      em {{item.weather[0].description}}
-                    p {{item.hourlyDetail}}
-                tr(v-if='item.displayHourlyDateRow')
-                  td.hourly-date-td(colspan='2')
-                    strong {{item.timeDmdy}}
+            keep-alive
+              component(v-bind:is='content' v-bind="tabProps")
+              //- tabMain(v-bind:foreMainTable='foreMainTable')
+              //- tabHourly(v-bind:foreHourlyTable='foreHourlyTable')
 
     h1 {{ msg }}
     img(src='./assets/logo.png')
@@ -75,23 +41,33 @@ import axios from 'axios'
 import moment from 'moment'
 import Highcharts from 'highcharts'
 import chartObj from './chartObject'
+import currentWeather from './currentWeather.vue'
+import tabMain from './tabMain.vue'
+import tabHourly from './tabHourly.vue'
 
 export default {
   name: 'app',
+  components: {
+    currentWeather: currentWeather,
+    tabMain: tabMain,
+    tabHourly: tabHourly
+  },
   data () {
     return {
       msg: 'testtest',
       inputCity: '',
       tempSwitch: false,
       display: false,
-      displayMain: true,
-      displayHourly: false,
-      city: '',
-      country: '',
-      currImg: '',
-      currTemp: '',
-      currDescrip: '',
-      currTime: '',
+      content: 'tabMain',
+      tabProps: {foreMainTable: this.foreMainTable},
+      currInfo: {
+        city: '',
+        country: '',
+        currImg: '',
+        currTemp: '',
+        currDescrip: '',
+        currTime: ''
+      },
       currTable: [
         {prop: 'Wind', value: ''},
         {prop: 'Cloudiness', value: ''},
@@ -108,12 +84,17 @@ export default {
   watch: {
     tempSwitch () {
       this.search()
+    },
+    content () {
+      if (this.content === 'tabMain') {
+        this.tabProps = { foreMainTable: this.foreMainTable }
+      } else {
+        this.tabProps = { foreHourlyTable: this.foreHourlyTable }
+      }
     }
   },
   methods: {
     search: function () {
-      console.log(this)
-      console.log(this.tempSwitch)
       const degrees = this.tempSwitch ? ' °F' : ' °C'
 
       Promise.all([
@@ -163,12 +144,12 @@ export default {
         '[ ' + apiData.coord.lat + ', ' + apiData.coord.lon + ' ]'
       ]
 
-      this.city = apiData.name
-      this.country = apiData.sys.country
-      this.currImg = 'https://openweathermap.org/img/w/' + apiData.weather[0].icon + '.png'
-      this.currTemp = parseInt(apiData.main.temp) + degrees
-      this.currDescrip = apiData.weather[0].description
-      this.currTime = moment(apiData.dt * 1000).format('HH:mm MMM DD')
+      this.currInfo.city = apiData.name
+      this.currInfo.country = apiData.sys.country
+      this.currInfo.currImg = 'https://openweathermap.org/img/w/' + apiData.weather[0].icon + '.png'
+      this.currInfo.currTemp = parseInt(apiData.main.temp) + degrees
+      this.currInfo.currDescrip = apiData.weather[0].description
+      this.currInfo.currTime = moment(apiData.dt * 1000).format('HH:mm MMM DD')
       this.currTable.forEach((item, index) => {
         item.value = currTableData[index]
       })
@@ -199,7 +180,7 @@ export default {
         this.foreMainTable[i].hpa = data.main.pressure
         this.foreMainTable[i].temp = data.main.temp
       }
-
+      this.tabProps.foreMainTable = this.foreMainTable
       this.buildMainChart(apiData.list, degrees, chartObj)
     },
     buildMainChart: function (apiData, degrees, chartObj) {
@@ -225,6 +206,9 @@ export default {
 
       Highcharts.chart('chart-container', config)
     }
+  },
+  computed: {
+
   }
 }
 </script>
@@ -298,24 +282,6 @@ html, body {
   min-width: 950px;
 }
 
-#current-weather-container {
-  @include text(14px, $title-deep-gray)
-  min-width: 250px;
-  #current-weather-temp {
-    margin-top: 11px;
-  }
-  table {
-    border-collapse: collapse;
-  }
-  td {
-    padding : 5px;
-    border: 1px solid $table-border-gray;
-  }
-  tr:nth-child(odd){
-    background-color: $table-row-gray;
-  }
-}
-
 #fore-weather-title {
   @include text(23px, $deep-orange)
 }
@@ -350,6 +316,7 @@ html, body {
   min-width: 700px;
   table {
     @include text(14px, $title-deep-gray)
+    margin-top: 10px;
     width: 750px;
     border-collapse: collapse;
   }
