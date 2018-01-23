@@ -25,10 +25,10 @@
             | Weather and forecasts in {{currInfo.city}}, {{currInfo.country}}
             span#fore-weather-city
             span#fore-weather-country
-            keep-alive
-              component(v-bind:is='content' v-bind="tabProps")
-              //- tabMain(v-bind:foreMainTable='foreMainTable')
-              //- tabHourly(v-bind:foreHourlyTable='foreHourlyTable')
+          keep-alive
+            component(v-bind:is='content' v-bind="tabProps")
+            //- tabMain(v-bind:foreMainTable='foreMainTable')
+            //- tabHourly(v-bind:foreHourlyTable='foreHourlyTable')
     img(src='./assets/logo.png')
     router-view
 </template>
@@ -143,29 +143,40 @@ export default {
     },
     forecastData: function (apiData, degrees, chartObject) {
       this.foreHourlyTable = apiData.list.map((item, index, array) => {
-        item.weather[0].icon = 'https://openweathermap.org/img/w/' + item.weather[0].icon + '.png'
-        item.main.temp = item.main.temp.toFixed(1) + degrees
-        item.timeHm = moment(item.dt * 1000).format('HH:mm')
-        item.hourlyDetail = item.wind.speed + ', m/s   ' + 'clouds: ' + item.clouds.all + '%,  ' + item.main.pressure + ' hpa'
-        array[0].timeDmdy = moment(array[0].dt * 1000).format('ddd MMM DD YYYY')
+        const tempObj = {}
+        tempObj.temp = item.main.temp.toFixed(1) + degrees
+        tempObj.descrip = item.weather[0].description
+        tempObj.icon = 'https://openweathermap.org/img/w/' + item.weather[0].icon + '.png'
+        tempObj.timeHm = moment(item.dt * 1000).format('HH:mm')
+        tempObj.hourlyDetail = item.wind.speed + ', m/s   ' + 'clouds: ' + item.clouds.all + '%,  ' + item.main.pressure + ' hpa'
 
-        if (index < array.length - 1 && !moment(item.dt * 1000).isSame(array[index + 1].dt * 1000, 'day')) {
-          item.displayHourlyDateRow = true
-          item.timeDmdy = moment(array[index + 1].dt * 1000).format('ddd MMM DD YYYY')
-        } else {
-          item.displayHourlyDateRow = false
+        if (index === 0) {
+          tempObj.timeDmdy = moment(array[0].dt * 1000).format('ddd MMM DD YYYY')
         }
 
-        return item
+        if (index < array.length - 1 && !moment(item.dt * 1000).isSame(array[index + 1].dt * 1000, 'day')) {
+          tempObj.displayHourlyDateRow = true
+          tempObj.timeDmdy = moment(array[index + 1].dt * 1000).format('ddd MMM DD YYYY')
+        } else {
+          tempObj.displayHourlyDateRow = false
+        }
+
+        // item.weather[0].icon = 'https://openweathermap.org/img/w/' + item.weather[0].icon + '.png'
+        // item.temp = item.main.temp.toFixed(1) + degrees
+        // item.timeHm = moment(item.dt * 1000).format('HH:mm')
+        // item.hourlyDetail = item.wind.speed + ', m/s   ' + 'clouds: ' + item.clouds.all + '%,  ' + item.main.pressure + ' hpa'
+        // array[0].timeDmdy = moment(array[0].dt * 1000).format('ddd MMM DD YYYY')
+
+        return tempObj
       })
 
       for (let i = 0; i < 10; i++) {
         const data = apiData.list[i]
         this.foreMainTable[i] = {}
-        this.foreMainTable[i].icon = data.weather[0].icon
+        this.foreMainTable[i].icon = 'https://openweathermap.org/img/w/' + data.weather[0].icon + '.png'
         this.foreMainTable[i].wind = data.wind.speed + ' m/s'
         this.foreMainTable[i].hpa = data.main.pressure
-        this.foreMainTable[i].temp = data.main.temp
+        this.foreMainTable[i].temp = data.main.temp + degrees
       }
 
       this.tabProps.foreMainTable = this.foreMainTable
@@ -330,14 +341,6 @@ html, body {
   border-radius: 10px;
   background-color: $hourly-temp-gray;
 }
-
-// .tab-content {
-//   display: none;
-// }
-
-// .tab-content-show {
-//   display: block;
-// }
 
 #chart-container {
   max-width: 100%;

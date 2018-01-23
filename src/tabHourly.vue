@@ -4,15 +4,15 @@
       template(v-for='(item, index) in foreHourlyTable')
         tr(v-if='index === 0')
           td.hourly-date-td(colspan='2')
-            strong {{item.timeDmdy}}
+            strong {{item.timeDmdy}} {{'Today'}}
         tr
           td.hourly-info-td
             span {{item.timeHm}}
-            img(alt='weatherIcon' :src='item.weather[0].icon')
+            img(alt='weatherIcon' :src='item.icon')
           td.hourly-info-td
             p
-              span.hourly-temp {{item.main.temp}}
-              em {{item.weather[0].description}}
+              span.hourly-temp {{item.temp}}
+              em {{item.descrip}}
             p {{item.hourlyDetail}}
         tr(v-if='item.displayHourlyDateRow')
           td.hourly-date-td(colspan='2')
