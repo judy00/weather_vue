@@ -1,15 +1,15 @@
 <template lang="pug">
   section#current-weather-container.inline-block
     h2#current-weather-title.deep-gary-title(v-show='display')
-      | Weather in {{currInfo.city}}, {{currInfo.country}}
+      | Weather in {{info.city}}, {{info.country}}
       span#current-weather-city
       span#current-weather-country
-    img#current-weather-image(alt='weatherIcon' :src='currInfo.currImg' v-show='display')
-    h2#current-weather-temp.deep-gary-title.inline-block {{currInfo.currTemp}}
-    p#current-descrip-text {{currInfo.currDescrip}}
-    p#current-descrip-time {{currInfo.currTime}}
+    img#current-weather-image(alt='weatherIcon' :src='info.img' v-show='display')
+    h2#current-weather-temp.deep-gary-title.inline-block {{info.temp}}
+    p#current-descrip-text {{info.descrip}}
+    p#current-descrip-time {{info.time}}
     table#current-weather-table(v-show='display')
-      template(v-for='item in currTable')
+      template(v-for='item in table')
         tr
           td {{item.prop}}
           td {{item.value}}
@@ -18,9 +18,9 @@
 <script>
 export default {
   props: [
-    'currTable',
+    'table',
     'display',
-    'currInfo'
+    'info'
   ]
 }
 </script>

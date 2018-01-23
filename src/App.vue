@@ -11,8 +11,8 @@
             span#temp-unit °C　°F
       section#weather-data-container
         currentWeather(v-bind:display='display'
-                       v-bind:currInfo='currInfo'
-                       v-bind:currTable='currTable'
+                       v-bind:info='currInfo'
+                       v-bind:table='currTable'
                       )
         section#forecast-weather-container.inline-block
           h2#fore-weather-title(v-show='display') Current weather and forecasts in your city
@@ -29,8 +29,6 @@
               component(v-bind:is='content' v-bind="tabProps")
               //- tabMain(v-bind:foreMainTable='foreMainTable')
               //- tabHourly(v-bind:foreHourlyTable='foreHourlyTable')
-
-    h1 {{ msg }}
     img(src='./assets/logo.png')
     router-view
 </template>
@@ -54,19 +52,18 @@ export default {
   },
   data () {
     return {
-      msg: 'testtest',
       inputCity: '',
       tempSwitch: false,
       display: false,
       content: 'tabMain',
-      tabProps: {foreMainTable: this.foreMainTable},
+      tabProps: {foreMainTable: ''},
       currInfo: {
         city: '',
         country: '',
-        currImg: '',
-        currTemp: '',
-        currDescrip: '',
-        currTime: ''
+        img: '',
+        temp: '',
+        descrip: '',
+        time: ''
       },
       currTable: [
         {prop: 'Wind', value: ''},
@@ -125,14 +122,6 @@ export default {
     showElement: function () {
       this.display = true
     },
-    showMainContent: function () {
-      this.displayMain = true
-      this.displayHourly = false
-    },
-    showHourlyContent: function () {
-      this.displayMain = false
-      this.displayHourly = true
-    },
     currentData: function (apiData, degrees) {
       const currTableData = [
         apiData.wind.speed + 'm/s, ' + apiData.wind.deg,
@@ -146,13 +135,11 @@ export default {
 
       this.currInfo.city = apiData.name
       this.currInfo.country = apiData.sys.country
-      this.currInfo.currImg = 'https://openweathermap.org/img/w/' + apiData.weather[0].icon + '.png'
-      this.currInfo.currTemp = parseInt(apiData.main.temp) + degrees
-      this.currInfo.currDescrip = apiData.weather[0].description
-      this.currInfo.currTime = moment(apiData.dt * 1000).format('HH:mm MMM DD')
-      this.currTable.forEach((item, index) => {
-        item.value = currTableData[index]
-      })
+      this.currInfo.img = 'https://openweathermap.org/img/w/' + apiData.weather[0].icon + '.png'
+      this.currInfo.temp = parseInt(apiData.main.temp) + degrees
+      this.currInfo.descrip = apiData.weather[0].description
+      this.currInfo.time = moment(apiData.dt * 1000).format('HH:mm MMM DD')
+      this.currTable.forEach((item, index) => { item.value = currTableData[index] })
     },
     forecastData: function (apiData, degrees, chartObject) {
       this.foreHourlyTable = apiData.list.map((item, index, array) => {
@@ -180,6 +167,7 @@ export default {
         this.foreMainTable[i].hpa = data.main.pressure
         this.foreMainTable[i].temp = data.main.temp
       }
+
       this.tabProps.foreMainTable = this.foreMainTable
       this.buildMainChart(apiData.list, degrees, chartObj)
     },
@@ -206,9 +194,6 @@ export default {
 
       Highcharts.chart('chart-container', config)
     }
-  },
-  computed: {
-
   }
 }
 </script>
