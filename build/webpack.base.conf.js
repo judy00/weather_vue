@@ -31,6 +31,7 @@ module.exports = {
       ? config.build.assetsPublicPath
       : config.dev.assetsPublicPath
   },
+  devtool: 'inline-source-map',
   resolve: {
     extensions: ['.js', '.vue', '.json'],
     alias: {
