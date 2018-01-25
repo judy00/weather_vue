@@ -1,27 +1,75 @@
 <template lang="pug">
   section#current-weather-container.inline-block
-    h2#current-weather-title.deep-gary-title(v-show='display')
-      | Weather in {{info.city}}, {{info.country}}
+    h2#current-weather-title.deep-gary-title
+      | Weather in {{ data.name }}, {{ data.sys.country }}
       span#current-weather-city
       span#current-weather-country
-    img#current-weather-image(alt='weatherIcon' :src='info.img' v-show='display')
-    h2#current-weather-temp.deep-gary-title.inline-block {{info.temp}}
-    p#current-descrip-text {{info.descrip}}
-    p#current-descrip-time {{info.time}}
-    table#current-weather-table(v-show='display')
-      template(v-for='item in table')
-        tr
-          td {{item.prop}}
-          td {{item.value}}
+    img#current-weather-image(alt='weatherIcon' :src='`https://openweathermap.org/img/w/${data.weather[0].icon}.png`')
+    h2#current-weather-temp.deep-gary-title.inline-block {{ parseInt(data.main.temp) }} {{ degree }}
+    p#current-descrip-text {{ data.weather[0].description }}
+    p#current-descrip-time {{ data.dt | date }}
+    table#current-weather-table
+      tr
+        td Wind
+        td {{ data.wind.speed }} m/s, {{ data.wind.deg }}
+      tr
+        td Cloudiness
+        td Broken clouds
+      tr
+        td Pressure
+        td {{ data.main.pressure }} hpa
+      tr
+        td Humidity
+        td {{ data.main.humidity }} %
+      tr
+        td Sunrise
+        td {{ data.sys.sunrise | sunrise}}
+      tr
+        td Sunset
+        td {{ data.sys.sunset | sunset}}
+      tr
+        td Coord
+        td [ {{ data.coord.lat }} , {{ data.coord.lon }} ]
+
 </template>
 
 <script>
+import moment from 'moment'
+
 export default {
-  props: [
-    'table',
-    'display',
-    'info'
-  ]
+  props: {
+    data: {
+      type: Object,
+      default () {
+        return {
+          sys: {},
+          wind: {},
+          main: {},
+          coord: {},
+          weather: [{}],
+          country: '',
+          description: '',
+          icon: '',
+          dt: '',
+          name: ''
+        }
+      }
+    },
+    degree: {
+      type: String
+    }
+  },
+  filters: {
+    sunrise (rawTime) {
+      return moment(rawTime * 1000).format('HH:mm')
+    },
+    sunset (rawTime) {
+      return moment(rawTime * 1000).format('HH:mm')
+    },
+    date (rawTime) {
+      return moment(rawTime * 1000).format('HH:mm MMM DD')
+    }
+  }
 }
 </script>
 

@@ -1,12 +1,14 @@
 <template lang="pug">
   section#Main.tab-content
+    h3#fore-weather-subtitle
+     | Weather and forecasts in {{ data.city.name }}, {{ data.city.country }}
     section#chart-container.fore-main-chart-container
     section#fore-main-info-container
-      section.fore-main-info.inline-block(v-for='item in foreMainTable')
-        img.fore-main-img(alt='weatherIcon', v-bind:src='item.icon')
-        p.fore-main-temp {{ item.temp }}
-        p.fore-main-wind {{ item.wind }}
-        p.fore-main-hpa.color-light-gray {{ item.hpa }}
+      section.fore-main-info.inline-block(v-for='(item, idx) in data.list' v-if='idx < 10')
+        img.fore-main-img(alt='weatherIcon', :src='imgSrc(item.weather[0].icon)')
+        p.fore-main-temp {{ item.main.temp }} {{degree}}
+        p.fore-main-wind {{ item.wind.speed }} m/s
+        p.fore-main-hpa.color-light-gray {{ item.main.pressure }}
 </template>
 
 <script>
@@ -15,9 +17,24 @@ import moment from 'moment'
 import Highcharts from 'highcharts'
 
 export default {
-  props: [
-    'foreMainTable'
-  ],
+  props: {
+    data: {
+      type: Object,
+      default () {
+        return {
+          city: {},
+          country: '',
+          name: '',
+          list: [],
+          weather: [],
+          icon: ''
+        }
+      }
+    },
+    degree: {
+      type: String
+    }
+  },
   methods: {
     buildMainChart: function (apiData, degrees, chartObj) {
       const config = JSON.parse(JSON.stringify(chartObj))
@@ -39,8 +56,10 @@ export default {
           config.series[0].data.push(0)
         }
       }
-
       Highcharts.chart('chart-container', config)
+    },
+    imgSrc (icon) {
+      return 'https://openweathermap.org/img/w/' + icon + '.png'
     }
   }
 }
@@ -48,6 +67,10 @@ export default {
 
 <style lang="scss">
 @import "styles/variables";
+
+#fore-weather-subtitle {
+  @include text(18px, $title-deep-gray)
+}
 
 #chart-container {
   max-width: 100%;

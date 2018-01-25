@@ -1,0 +1,17 @@
+$deep-orange: #d26c22;
+$table-border-gray: #d5d5d5;
+$table-row-gray: #f0f0f0;
+$title-deep-gray: #646464;
+$tab-gray: #868686;
+$hourly-temp-gray: #999999;
+$main-hpa-gray: #808080;
+$temp-slider-orange: #ef9b74;
+
+@mixin text($size, $color) {
+  font-size: $size;
+  color: $color;
+}
+
+.inline-block {
+  display: inline-block;
+}
