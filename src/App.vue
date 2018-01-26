@@ -18,9 +18,8 @@
               a#forecast-tab-main.forecast-tab(href='#', @click="content='tabMain'") Main
             li.inline-block
               a#forecast-tab-hourly.forecast-tab(href='#', @click="content='tabHourly'") Hourly
-          tabMain(:data='foreData', :degree="degree", v-show="content === 'tabMain'", ref='tabMain')
-          tabHourly(:data='foreData', :degree="degree", :today='foreHourlyToday', ref='tabHourly', v-show="content === 'tabHourly'")
-
+          tabMain(:data='foreData', :degree="degree", ref='tabMain', v-show="content === 'tabMain'")
+          tabHourly(:data='foreData', :degree="degree", ref='tabHourly', v-show="content === 'tabHourly'")
     img(src='./assets/logo.png')
     router-view
 </template>
@@ -28,8 +27,6 @@
 <script>
 
 import axios from 'axios'
-import chartObj from './chartObject'
-
 import currentWeather from './currentWeather.vue'
 import tabMain from './tabMain.vue'
 import tabHourly from './tabHourly.vue'
@@ -47,13 +44,6 @@ export default {
       tempSwitch: false,
       display: false,
       content: '',
-      tabProps: {foreMainTable: ''},
-      currInfo: {
-        city: '',
-        country: ''
-      },
-      foreHourlyTable: [],
-      foreHourlyToday: '',
       degree: '',
       currData: undefined,
       foreData: undefined
@@ -65,7 +55,7 @@ export default {
     }
   },
   methods: {
-    search: function () {
+    search () {
       const degrees = this.tempSwitch ? ' °F' : ' °C'
       this.degree = degrees
 
@@ -86,12 +76,12 @@ export default {
         })
       ])
         .then(([{data: acct}, {data: perms}]) => {
-          if (this.content === '') { this.content = 'tabMain' }
+          if (this.content === '') this.content = 'tabMain'
           this.display = true
           this.currData = acct
           this.foreData = perms
           this.$refs.tabHourly.diffDay()
-          this.$refs.tabMain.buildMainChart(perms.list, degrees, chartObj)
+          this.$refs.tabMain.buildMainChart(perms.list)
         })
         .catch(function (error) {
           console.log(error)

@@ -15,6 +15,7 @@
 
 import moment from 'moment'
 import Highcharts from 'highcharts'
+import chartObj from './chartObject'
 
 export default {
   props: {
@@ -23,11 +24,8 @@ export default {
       default () {
         return {
           city: {},
-          country: '',
-          name: '',
           list: [],
-          weather: [],
-          icon: ''
+          weather: []
         }
       }
     },
@@ -36,12 +34,12 @@ export default {
     }
   },
   methods: {
-    buildMainChart: function (apiData, degrees, chartObj) {
+    buildMainChart (apiData) {
       const config = JSON.parse(JSON.stringify(chartObj))
 
       config.yAxis[0].labels.formatter =
         function () {
-          return Math.round(this.value) + degrees
+          return Math.round(this.value) + this.degree
         }
 
       for (let i = 0; i < 10; i++) {

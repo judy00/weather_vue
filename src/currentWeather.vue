@@ -4,7 +4,7 @@
       | Weather in {{ data.name }}, {{ data.sys.country }}
       span#current-weather-city
       span#current-weather-country
-    img#current-weather-image(alt='weatherIcon' :src='`https://openweathermap.org/img/w/${data.weather[0].icon}.png`')
+    img#current-weather-image(alt='weatherIcon', :src='`https://openweathermap.org/img/w/${data.weather[0].icon}.png`')
     h2#current-weather-temp.deep-gary-title.inline-block {{ parseInt(data.main.temp) }} {{ degree }}
     p#current-descrip-text {{ data.weather[0].description }}
     p#current-descrip-time {{ data.dt | date }}
@@ -46,12 +46,7 @@ export default {
           wind: {},
           main: {},
           coord: {},
-          weather: [{}],
-          country: '',
-          description: '',
-          icon: '',
-          dt: '',
-          name: ''
+          weather: [{}]
         }
       }
     },

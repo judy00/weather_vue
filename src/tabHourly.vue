@@ -30,11 +30,8 @@ export default {
       type: Object,
       default () {
         return {
-          name: '',
-          country: '',
           city: {},
-          list: [{}],
-          dt: ''
+          list: [{}]
         }
       }
     },
@@ -62,7 +59,7 @@ export default {
     }
   },
   methods: {
-    diffDay: function () {
+    diffDay () {
       this.list.splice(0)
       if (this.data.list !== undefined) {
         this.data.list.forEach((item, index, array) => {
