@@ -3,24 +3,24 @@
     main
       section#search-bar-container
         form
-          input#input-city-name.search-bar-item-style(type='text', placeholder='Your city name', v-model='inputCity')
-          input#search-city-button.search-bar-item-style(type='button', value='search', @click='search')
+          input#input-city-name.search-bar-item-style(type="text", placeholder="Your city name", v-model="inputCity")
+          input#search-city-button.search-bar-item-style(type="button", value="search", @click="search")
           label#temp-switch-btn
-            input#temp-check-box(type='checkbox', v-model='tempSwitch')
+            input#temp-check-box(type="checkbox", v-model="tempSwitch")
             span#temp-slider.round
             span#temp-unit °C　°F
       section#weather-data-container
         currentWeather(v-show="display", :data="currData", :degree="degree")
         section#forecast-weather-container.inline-block
-          h2#fore-weather-title(v-show='display') Current weather and forecasts in your city
-          ul#fore-tab-list(v-show='display')
+          h2#fore-weather-title(v-show="display") Current weather and forecasts in your city
+          ul#fore-tab-list(v-show="display")
             li.inline-block
-              a#forecast-tab-main.forecast-tab(href='#', @click="content='tabMain'") Main
+              a#forecast-tab-main.forecast-tab(href="#", @click="content='tabMain'") Main
             li.inline-block
-              a#forecast-tab-hourly.forecast-tab(href='#', @click="content='tabHourly'") Hourly
-          tabMain(:data='foreData', :degree="degree", ref='tabMain', v-show="content === 'tabMain'")
-          tabHourly(:data='foreData', :degree="degree", ref='tabHourly', v-show="content === 'tabHourly'")
-    img(src='./assets/logo.png')
+              a#forecast-tab-hourly.forecast-tab(href="#", @click="content='tabHourly'") Hourly
+          tabMain(:data="foreData", :degree="degree", ref="tabMain", v-show="content === 'tabMain'")
+          tabHourly(:data="foreData", :degree="degree", ref="tabHourly", v-show="content === 'tabHourly'")
+    img(src="./assets/logo.png")
     router-view
 </template>
 
@@ -30,6 +30,7 @@ import axios from 'axios'
 import currentWeather from '@/components/CurrentWeather.vue'
 import tabMain from '@/components/TabMain.vue'
 import tabHourly from '@/components/TabHourly.vue'
+import { currentSite, foreCastSite, APPID } from './constants'
 
 export default {
   name: 'app',
@@ -60,18 +61,18 @@ export default {
       this.degree = degrees
 
       Promise.all([
-        axios.get('http://api.openweathermap.org/data/2.5/weather?', {
+        axios.get(currentSite, {
           params: {
             q: this.inputCity,
             units: this.tempSwitch ? 'imperial' : 'metric',
-            APPID: '9c8dadba0d86fe1e366e1e7781cdfc59'
+            APPID
           }
         }),
-        axios.get('http://api.openweathermap.org/data/2.5/forecast?', {
+        axios.get(foreCastSite, {
           params: {
             q: this.inputCity,
             units: this.tempSwitch ? 'imperial' : 'metric',
-            APPID: '9c8dadba0d86fe1e366e1e7781cdfc59'
+            APPID
           }
         })
       ])

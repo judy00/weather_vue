@@ -5,7 +5,7 @@
     section#chart-container.fore-main-chart-container
     section#fore-main-info-container
       section.fore-main-info.inline-block(v-for="(item, idx) in list")
-        img.fore-main-img(alt="weatherIcon", :src="`https://openweathermap.org/img/w/${item.weather[0].icon}.png`")
+        img.fore-main-img(alt="weatherIcon", :src="imgSrc(item.weather[0].icon)")
         p.fore-main-temp {{ item.main.temp }} {{degree}}
         p.fore-main-wind {{ item.wind.speed }} m/s
         p.fore-main-hpa.color-light-gray {{ item.main.pressure }}
@@ -16,6 +16,7 @@
 import moment from 'moment'
 import Highcharts from 'highcharts'
 import chartObj from '@/chartObject'
+import { imgSrc } from '@/constants'
 
 export default {
   props: {
@@ -60,6 +61,9 @@ export default {
         }
       }
       Highcharts.chart('chart-container', config)
+    },
+    imgSrc (icon) {
+      return `${imgSrc}${icon}.png`
     }
   }
 }

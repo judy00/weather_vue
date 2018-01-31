@@ -13,7 +13,7 @@
         tr(v-else)
           td.hourly-info-td
             span {{ item.dt | hour }}
-            img(alt="weatherIcon", :src="`https://openweathermap.org/img/w/${item.weather[0].icon}.png`")
+            img(alt="weatherIcon", :src="imgSrc(item.weather[0].icon)")
           td.hourly-info-td
             p
               span.hourly-temp {{ item.main.temp.toFixed(1) }} {{degree}}
@@ -23,6 +23,7 @@
 
 <script>
 import moment from 'moment'
+import { imgSrc } from '@/constants'
 
 export default {
   props: {
@@ -61,6 +62,11 @@ export default {
     },
     firstDay () {
       return this.data.list.length > 0 ? this.data.list[0].dt : 0
+    }
+  },
+  methods: {
+    imgSrc (icon) {
+      return `${imgSrc}${icon}.png`
     }
   }
 }
