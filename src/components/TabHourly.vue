@@ -4,16 +4,16 @@
      | Weather and forecasts in {{ data.city.name }}, {{ data.city.country }}
     table#fore-weather-hourly-table
       tr
-        td.hourly-date-td(colspan='2')
-          strong {{ data.list[0].dt | date }} Today
-      template(v-for='item in list')
-        tr(v-if='item.isDate')
-          td.hourly-date-td(colspan='2')
+        td.hourly-date-td(colspan="2")
+          strong {{ firstDay | date }} Today
+      template(v-for="item in list")
+        tr(v-if="item.isDate")
+          td.hourly-date-td(colspan="2")
             strong {{ item.day }}
         tr(v-else)
           td.hourly-info-td
             span {{ item.dt | hour }}
-            img(alt='weatherIcon', :src='`https://openweathermap.org/img/w/${item.weather[0].icon}.png`')
+            img(alt="weatherIcon", :src="`https://openweathermap.org/img/w/${item.weather[0].icon}.png`")
           td.hourly-info-td
             p
               span.hourly-temp {{ item.main.temp.toFixed(1) }} {{degree}}
@@ -31,17 +31,12 @@ export default {
       default () {
         return {
           city: {},
-          list: [{}]
+          list: []
         }
       }
     },
     degree: {
       type: String
-    }
-  },
-  data () {
-    return {
-      list: []
     }
   },
   filters: {
@@ -52,31 +47,27 @@ export default {
       return moment(rawTime * 1000).format('HH:mm')
     }
   },
-  watch: {
-    data () {
-      this.list.splice(0)
-      this.diffDay()
-    }
-  },
-  methods: {
-    diffDay () {
-      this.list.splice(0)
-      if (this.data.list !== undefined) {
-        this.data.list.forEach((item, index, array) => {
-          if (index < array.length - 1 && !moment(item.dt * 1000).isSame(array[index + 1].dt * 1000, 'day')) {
-            this.list.push(item, { isDate: true, day: moment(array[index + 1].dt * 1000).format('ddd MMM DD YYYY') })
-          } else {
-            this.list.push(item)
-          }
-        })
-      }
+  computed: {
+    list () {
+      const tempArray = []
+      this.data.list.forEach((item, index, array) => {
+        if (index < array.length - 1 && !moment(item.dt * 1000).isSame(array[index + 1].dt * 1000, 'day')) {
+          tempArray.push(item, { isDate: true, day: moment(array[index + 1].dt * 1000).format('ddd MMM DD YYYY') })
+        } else {
+          tempArray.push(item)
+        }
+      })
+      return tempArray
+    },
+    firstDay () {
+      return this.data.list.length > 0 ? this.data.list[0].dt : 0
     }
   }
 }
 </script>
 
 <style lang="scss">
-@import "styles/variables";
+@import "src/styles/variables";
 
 #fore-weather-subtitle {
   @include text(18px, $title-deep-gray)

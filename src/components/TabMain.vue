@@ -4,8 +4,8 @@
      | Weather and forecasts in {{ data.city.name }}, {{ data.city.country }}
     section#chart-container.fore-main-chart-container
     section#fore-main-info-container
-      section.fore-main-info.inline-block(v-for='(item, idx) in data.list' v-if='idx < 10')
-        img.fore-main-img(alt='weatherIcon', :src='imgSrc(item.weather[0].icon)')
+      section.fore-main-info.inline-block(v-for="(item, idx) in list")
+        img.fore-main-img(alt="weatherIcon", :src="`https://openweathermap.org/img/w/${item.weather[0].icon}.png`")
         p.fore-main-temp {{ item.main.temp }} {{degree}}
         p.fore-main-wind {{ item.wind.speed }} m/s
         p.fore-main-hpa.color-light-gray {{ item.main.pressure }}
@@ -15,7 +15,7 @@
 
 import moment from 'moment'
 import Highcharts from 'highcharts'
-import chartObj from './chartObject'
+import chartObj from '@/chartObject'
 
 export default {
   props: {
@@ -31,6 +31,11 @@ export default {
     },
     degree: {
       type: String
+    }
+  },
+  computed: {
+    list () {
+      return this.data.list.slice(0, 10)
     }
   },
   methods: {
@@ -55,16 +60,13 @@ export default {
         }
       }
       Highcharts.chart('chart-container', config)
-    },
-    imgSrc (icon) {
-      return 'https://openweathermap.org/img/w/' + icon + '.png'
     }
   }
 }
 </script>
 
 <style lang="scss">
-@import "styles/variables";
+@import "src/styles/variables";
 
 #fore-weather-subtitle {
   @include text(18px, $title-deep-gray)
@@ -83,7 +85,7 @@ export default {
     margin: 2px 0px;
   }
   .fore-main-info {
-    margin: 0px 2.8px;
+    width: 10%;
   }
   .color-light-gray {
     color: $main-hpa-gray;

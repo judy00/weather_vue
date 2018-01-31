@@ -1,10 +1,10 @@
 <template lang="pug">
-  section#current-weather-container.inline-block
+  section#current-weather-container.inline-block(v-if="data.weather.length > 0")
     h2#current-weather-title.deep-gary-title
       | Weather in {{ data.name }}, {{ data.sys.country }}
       span#current-weather-city
       span#current-weather-country
-    img#current-weather-image(alt='weatherIcon', :src='`https://openweathermap.org/img/w/${data.weather[0].icon}.png`')
+    img#current-weather-image(alt="weatherIcon", :src="`https://openweathermap.org/img/w/${data.weather[0].icon}.png`")
     h2#current-weather-temp.deep-gary-title.inline-block {{ parseInt(data.main.temp) }} {{ degree }}
     p#current-descrip-text {{ data.weather[0].description }}
     p#current-descrip-time {{ data.dt | date }}
@@ -23,10 +23,10 @@
         td {{ data.main.humidity }} %
       tr
         td Sunrise
-        td {{ data.sys.sunrise | sunrise}}
+        td {{ data.sys.sunrise | time }}
       tr
         td Sunset
-        td {{ data.sys.sunset | sunset}}
+        td {{ data.sys.sunset | time }}
       tr
         td Coord
         td [ {{ data.coord.lat }} , {{ data.coord.lon }} ]
@@ -46,7 +46,7 @@ export default {
           wind: {},
           main: {},
           coord: {},
-          weather: [{}]
+          weather: []
         }
       }
     },
@@ -55,10 +55,7 @@ export default {
     }
   },
   filters: {
-    sunrise (rawTime) {
-      return moment(rawTime * 1000).format('HH:mm')
-    },
-    sunset (rawTime) {
+    time (rawTime) {
       return moment(rawTime * 1000).format('HH:mm')
     },
     date (rawTime) {

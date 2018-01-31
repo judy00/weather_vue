@@ -27,9 +27,9 @@
 <script>
 
 import axios from 'axios'
-import currentWeather from './currentWeather.vue'
-import tabMain from './tabMain.vue'
-import tabHourly from './tabHourly.vue'
+import currentWeather from '@/components/CurrentWeather.vue'
+import tabMain from '@/components/TabMain.vue'
+import tabHourly from '@/components/TabHourly.vue'
 
 export default {
   name: 'app',
@@ -80,8 +80,9 @@ export default {
           this.display = true
           this.currData = acct
           this.foreData = perms
-          this.$refs.tabHourly.diffDay()
-          this.$refs.tabMain.buildMainChart(perms.list)
+          this.$nextTick(() => {
+            this.$refs.tabMain.buildMainChart(perms.list)
+          })
         })
         .catch(function (error) {
           console.log(error)
