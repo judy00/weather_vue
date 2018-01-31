@@ -77,7 +77,6 @@ export default {
 }
 
 #chart-container {
-  max-width: 100%;
   height: 250px;
 }
 

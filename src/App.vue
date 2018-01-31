@@ -13,31 +13,22 @@
         currentWeather(v-show="display", :data="currData", :degree="degree")
         section#forecast-weather-container.inline-block
           h2#fore-weather-title(v-show="display") Current weather and forecasts in your city
-          ul#fore-tab-list(v-show="display")
-            li.inline-block
-              a#forecast-tab-main.forecast-tab(href="#", @click="content='tabMain'") Main
-            li.inline-block
-              a#forecast-tab-hourly.forecast-tab(href="#", @click="content='tabHourly'") Hourly
-          tabMain(:data="foreData", :degree="degree", ref="tabMain", v-show="content === 'tabMain'")
-          tabHourly(:data="foreData", :degree="degree", ref="tabHourly", v-show="content === 'tabHourly'")
-    img(src="./assets/logo.png")
-    router-view
+          router-link.forecast-tab(to="/main", v-show="display") Main
+          router-link.forecast-tab(to="/hourly" v-show="display") Hourly
+          keep-alive
+            router-view(v-show="display", :data="foreData", :degree="degree", ref="tabMain")
 </template>
 
 <script>
 
 import axios from 'axios'
 import currentWeather from '@/components/CurrentWeather.vue'
-import tabMain from '@/components/TabMain.vue'
-import tabHourly from '@/components/TabHourly.vue'
 import { currentSite, foreCastSite, APPID } from './constants'
 
 export default {
   name: 'app',
   components: {
-    currentWeather: currentWeather,
-    tabMain: tabMain,
-    tabHourly: tabHourly
+    currentWeather: currentWeather
   },
   data () {
     return {
