@@ -2,6 +2,9 @@
   div#app
     main
       section#search-bar-container
+        p {{count}}
+        button(@click="increment") +
+        button(@click="decrement") -
         form
           input#input-city-name.search-bar-item-style(type="text", placeholder="Your city name", v-model="inputCity")
           input#search-city-button.search-bar-item-style(type="button", value="search", @click="search")
@@ -46,6 +49,11 @@ export default {
       this.search()
     }
   },
+  computed: {
+    count () {
+      return this.$store.state.count
+    }
+  },
   methods: {
     search () {
       const degrees = this.tempSwitch ? ' °F' : ' °C'
@@ -72,6 +80,7 @@ export default {
           this.display = true
           this.currData = acct
           this.foreData = perms
+          this.$router.push({ path: '/main' })
           this.$nextTick(() => {
             this.$refs.tabMain.buildMainChart(perms.list)
           })
@@ -79,6 +88,12 @@ export default {
         .catch(function (error) {
           console.log(error)
         })
+    },
+    increment () {
+      this.$store.commit('increment')
+    },
+    decrement () {
+      this.$store.commit('decrement')
     }
   }
 }
