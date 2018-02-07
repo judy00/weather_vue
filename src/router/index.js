@@ -8,6 +8,10 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
+      path: '/',
+      component: TabMain
+    },
+    {
       path: '/main',
       name: 'main',
       component: TabMain

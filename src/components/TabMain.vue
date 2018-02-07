@@ -17,44 +17,29 @@ import moment from 'moment'
 import Highcharts from 'highcharts'
 import chartObj from '@/chartObject'
 import { imgSrc } from '@/constants'
+import { mapState } from 'vuex'
 
 export default {
-  props: {
-    data: {
-      type: Object,
-      default () {
-        return {
-          city: {},
-          list: [],
-          weather: []
-        }
-      }
-    },
-    degree: {
-      type: String
-    }
-  },
   computed: {
+    ...mapState(['data', 'degree']),
     list () {
-      return this.data.list.slice(0, 10)
+      return this.$store.state.data.list.slice(0, 10)
     }
   },
   methods: {
-    buildMainChart (apiData) {
+    buildMainChart (apiData, degree) {
       const config = JSON.parse(JSON.stringify(chartObj))
-
       config.yAxis[0].labels.formatter =
         function () {
-          return Math.round(this.value) + this.degree
+          return Math.round(this.value) + degree
         }
-
       for (let i = 0; i < 10; i++) {
         const data = apiData[i]
         config.xAxis.categories.push(moment(data.dt * 1000).format('HH:mm'))
         config.series[1].data.push(parseFloat(data.main.temp))
-        if (data.hasOwnProperty('rain')) {
+        if (data.hasOwnProperty('rain') && data.rain.hasOwnProperty('3h')) {
           for (let item in data.rain) {
-            config.series[0].data.push(data.rain[item].toFixed(3) * 1000)
+            config.series[0].data.push(data.rain[item].toFixed(1) * 1)
           }
         } else {
           config.series[0].data.push(0)

@@ -28,7 +28,7 @@ const chartObject = {
     },
     opposite: true,
     tickAmount: 4,
-    ls: {
+    labels: {
       formatter: function () {
         return Math.round(this.value) + 'mm'
       },

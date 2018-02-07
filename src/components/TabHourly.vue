@@ -24,34 +24,14 @@
 <script>
 import moment from 'moment'
 import { imgSrc } from '@/constants'
+import { mapState } from 'vuex'
 
 export default {
-  props: {
-    data: {
-      type: Object,
-      default () {
-        return {
-          city: {},
-          list: []
-        }
-      }
-    },
-    degree: {
-      type: String
-    }
-  },
-  filters: {
-    date (rawTime) {
-      return moment(rawTime * 1000).format('ddd MMM DD YYYY')
-    },
-    hour (rawTime) {
-      return moment(rawTime * 1000).format('HH:mm')
-    }
-  },
   computed: {
+    ...mapState(['data', 'degree']),
     list () {
       const tempArray = []
-      this.data.list.forEach((item, index, array) => {
+      this.$store.state.data.list.forEach((item, index, array) => {
         if (index < array.length - 1 && !moment(item.dt * 1000).isSame(array[index + 1].dt * 1000, 'day')) {
           tempArray.push(item, { isDate: true, day: moment(array[index + 1].dt * 1000).format('ddd MMM DD YYYY') })
         } else {
@@ -61,7 +41,15 @@ export default {
       return tempArray
     },
     firstDay () {
-      return this.data.list.length > 0 ? this.data.list[0].dt : 0
+      return this.$store.state.data.list.length > 0 ? this.$store.state.data.list[0].dt : 0
+    }
+  },
+  filters: {
+    date (rawTime) {
+      return moment(rawTime * 1000).format('ddd MMM DD YYYY')
+    },
+    hour (rawTime) {
+      return moment(rawTime * 1000).format('HH:mm')
     }
   },
   methods: {
@@ -80,8 +68,6 @@ export default {
 }
 
 #forecast-weather-container {
-  vertical-align: top;
-  min-width: 700px;
   table {
     @include text(14px, $title-deep-gray)
     margin-top: 10px;

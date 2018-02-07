@@ -2,9 +2,6 @@
   div#app
     main
       section#search-bar-container
-        p {{count}}
-        button(@click="increment") +
-        button(@click="decrement") -
         form
           input#input-city-name.search-bar-item-style(type="text", placeholder="Your city name", v-model="inputCity")
           input#search-city-button.search-bar-item-style(type="button", value="search", @click="search")
@@ -17,9 +14,9 @@
         section#forecast-weather-container.inline-block
           h2#fore-weather-title(v-show="display") Current weather and forecasts in your city
           router-link.forecast-tab(to="/main", v-show="display") Main
-          router-link.forecast-tab(to="/hourly" v-show="display") Hourly
+          router-link.forecast-tab(to="/hourly", v-show="display") Hourly
           keep-alive
-            router-view(v-show="display", :data="foreData", :degree="degree", ref="tabMain")
+            router-view(v-show="display", ref="tabMain")
 </template>
 
 <script>
@@ -38,20 +35,13 @@ export default {
       inputCity: '',
       tempSwitch: false,
       display: false,
-      content: '',
       degree: '',
-      currData: undefined,
-      foreData: undefined
+      currData: undefined
     }
   },
   watch: {
     tempSwitch () {
       this.search()
-    }
-  },
-  computed: {
-    count () {
-      return this.$store.state.count
     }
   },
   methods: {
@@ -76,24 +66,21 @@ export default {
         })
       ])
         .then(([{data: acct}, {data: perms}]) => {
-          if (this.content === '') this.content = 'tabMain'
           this.display = true
           this.currData = acct
-          this.foreData = perms
-          this.$router.push({ path: '/main' })
+          this.$store.dispatch({
+            type: 'getData',
+            data: perms,
+            degree: degrees
+          })
+          // this.$router.push({ path: '/main' })
           this.$nextTick(() => {
-            this.$refs.tabMain.buildMainChart(perms.list)
+            this.$refs.tabMain.buildMainChart(perms.list, degrees)
           })
         })
         .catch(function (error) {
           console.log(error)
         })
-    },
-    increment () {
-      this.$store.commit('increment')
-    },
-    decrement () {
-      this.$store.commit('decrement')
     }
   }
 }
@@ -145,6 +132,11 @@ html, body {
   margin: 50px auto 100px auto;
   width: 1000px;
   min-width: 950px;
+}
+
+#forecast-weather-container {
+  vertical-align: top;
+  min-width: 700px;
 }
 
 #fore-weather-title {
