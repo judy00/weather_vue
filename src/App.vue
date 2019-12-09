@@ -5,6 +5,8 @@
         form
           input#input-city-name.search-bar-item-style(type="text", placeholder="Your city name", v-model="inputCity")
           input#search-city-button.search-bar-item-style(type="button", value="search", @click="search")
+          ul.sample-city-name
+            li(v-for="city in sampleCities", @click="fillInCity(city)") {{ city }}
           label#temp-switch-btn
             input#temp-check-box(type="checkbox", v-model="tempSwitch")
             span#temp-slider.round
@@ -36,7 +38,8 @@ export default {
       tempSwitch: false,
       display: false,
       degree: '',
-      currData: undefined
+      currData: undefined,
+      sampleCities: ['Taipei', 'Tokyo', 'Beijing']
     }
   },
   watch: {
@@ -45,6 +48,10 @@ export default {
     }
   },
   methods: {
+    fillInCity (city) {
+      this.inputCity = city
+      return this.search()
+    },
     search () {
       const degrees = this.tempSwitch ? ' °F' : ' °C'
       this.degree = degrees
@@ -73,7 +80,7 @@ export default {
             data: perms,
             degree: degrees
           })
-          // this.$router.push({ path: '/main' })
+          this.$router.push({ path: '/main' })
           this.$nextTick(() => {
             this.$refs.tabMain.buildMainChart(perms.list, degrees)
           })
@@ -126,6 +133,27 @@ html, body {
   border-radius: 5px;
   vertical-align: middle;
   border: 1px solid $deep-orange;
+  padding: 0 10px;
+}
+
+.sample-city-name {
+  color: $sample-text-gray;
+  right: 65px;
+  bottom: 5px;
+  font-size: 14px;
+  position: relative;
+  list-style-type: none;
+
+  li {
+    margin: 10px;
+    display:inline;
+    cursor: pointer;
+
+    &:hover {
+      color: $deep-orange;
+      transition: .2s;
+    }
+  }
 }
 
 #weather-data-container {
