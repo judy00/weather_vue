@@ -1,21 +1,29 @@
-# weather_vue
+### 簡介
+- - -
+此作品為 Open Weather API + Vue Cli 前端練習，以及使用到 Highcharts 製作圖表
+* 可以在搜尋框輸入各國城市名稱，或是直接點擊範例城市名稱做搜尋
+* 可以切換華氏 (ºF) 與攝氏 (ºC) 單位
+* 顯示當日每三小時天氣情況與未來一周預報
 
-> A Vue.js project
+### DOME
+- - -
+https://judy00.github.io/weather_vue/
 
-## Build Setup
+### 使用技術
+- - -
+* Open Weather API
+* Highcharts
+* Moment.js
+* Vue Cli 
+* Vuex
+* Vue-Router
+* Vue Components
+* JavaScript(ES6)
+* PUG
+* SCSS
+* Webpack
+* ESlint(standard)
 
-``` bash
-# install dependencies
-npm install
 
-# serve with hot reload at localhost:8080
-npm run dev
 
-# build for production with minification
-npm run build
 
-# build for production and view the bundle analyzer report
-npm run build --report
-```
-
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
