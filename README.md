@@ -5,7 +5,7 @@
 * 可以切換華氏 (ºF) 與攝氏 (ºC) 單位
 * 顯示當日每三小時天氣情況與未來一周預報
 
-### DOME
+### DEMO
 - - -
 https://judy00.github.io/weather_vue/
 
